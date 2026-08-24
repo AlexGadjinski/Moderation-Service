@@ -8,12 +8,14 @@ import app.model.Report;
 import app.model.ReportStatus;
 import app.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReportService {
@@ -21,18 +23,12 @@ public class ReportService {
     private final ReportRepository reportRepository;
 
     public Report createReport(CreateReportRequest request) {
-        Report report = Report.builder()
-                .targetType(request.getTargetType())
-                .targetId(request.getTargetId())
-                .communityId(request.getCommunityId())
-                .reporterId(request.getReporterId())
-                .reason(request.getReason())
-                .details(request.getDetails())
-                .status(ReportStatus.PENDING)
-                .createdOn(LocalDateTime.now())
-                .build();
 
-        return reportRepository.save(report);
+        Report report = reportRepository.save(initializeReport(request));
+        log.info("Report created with id [{}] for {} with id [{}] in community [{}].",
+                report.getId(), report.getTargetType(), report.getTargetId(), report.getCommunityId());
+
+        return report;
     }
 
     public Report updateReport(UUID id, UpdateReportRequest request) {
@@ -47,15 +43,30 @@ public class ReportService {
         report.setResolvedById(request.getResolvedById());
         report.setResolvedOn(LocalDateTime.now());
 
-        return reportRepository.save(report);
+        Report updatedReport = reportRepository.save(report);
+        log.info("Report [{}] resolved with status [{}] by user with id [{}].",
+                updatedReport.getId(), updatedReport.getStatus(), updatedReport.getResolvedById());
+        return updatedReport;
     }
 
     public List<Report> getReportsByCommunity(UUID communityId, ReportStatus status) {
-
         if (status != null) {
             return reportRepository.findByCommunityIdAndStatus(communityId, status);
         }
 
         return reportRepository.findByCommunityId(communityId);
+    }
+
+    private Report initializeReport(CreateReportRequest request) {
+        return Report.builder()
+                .targetType(request.getTargetType())
+                .targetId(request.getTargetId())
+                .communityId(request.getCommunityId())
+                .reporterId(request.getReporterId())
+                .reason(request.getReason())
+                .details(request.getDetails())
+                .status(ReportStatus.PENDING)
+                .createdOn(LocalDateTime.now())
+                .build();
     }
 }
