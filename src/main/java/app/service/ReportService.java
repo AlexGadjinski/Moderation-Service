@@ -26,7 +26,7 @@ public class ReportService {
 
         Report report = reportRepository.save(initializeReport(request));
         log.info("Report created with id [{}] for {} with id [{}] in community [{}].",
-                report.getId(), report.getTargetType().name(), report.getTargetId(), report.getCommunityId());
+                report.getId(), report.getTargetType().name().toLowerCase(), report.getTargetId(), report.getCommunityId());
 
         return report;
     }
