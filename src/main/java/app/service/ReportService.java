@@ -37,6 +37,10 @@ public class ReportService {
         Report report = reportRepository.findById(id)
                 .orElseThrow(() -> new ReportNotFoundException("Report with id [%s] does not exist.".formatted(id)));
 
+        if (report.getStatus() != ReportStatus.PENDING) {
+            throw new BusinessRuleException("Report with id [%s] has already been resolved.".formatted(id));
+        }
+
         if (request.getStatus() == ReportStatus.PENDING) {
             throw new BusinessRuleException("Cannot set report status back to pending.");
         }
