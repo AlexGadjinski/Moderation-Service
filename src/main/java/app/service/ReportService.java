@@ -9,6 +9,8 @@ import app.model.ReportStatus;
 import app.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -49,12 +51,12 @@ public class ReportService {
         return updatedReport;
     }
 
-    public List<Report> getReportsByCommunity(UUID communityId, ReportStatus status) {
-        if (status != null) {
-            return reportRepository.findByCommunityIdAndStatus(communityId, status);
+    public Page<Report> getReportsByCommunity(UUID communityId, ReportStatus status, Pageable pageable) {
+        if (status == null) {
+            return reportRepository.findByCommunityId(communityId, pageable);
         }
 
-        return reportRepository.findByCommunityId(communityId);
+        return reportRepository.findByCommunityIdAndStatus(communityId, status, pageable);
     }
 
     private Report initializeReport(CreateReportRequest request) {

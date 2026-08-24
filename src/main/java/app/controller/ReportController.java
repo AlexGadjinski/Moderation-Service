@@ -1,6 +1,7 @@
 package app.controller;
 
 import app.dto.CreateReportRequest;
+import app.dto.PagedResponse;
 import app.dto.ReportResponse;
 import app.dto.UpdateReportRequest;
 import app.mapper.DtoMapper;
@@ -9,11 +10,14 @@ import app.model.ReportStatus;
 import app.service.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -43,11 +47,14 @@ public class ReportController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReportResponse>> getReportsByCommunity(@RequestParam UUID communityId,
-                                                                      @RequestParam(required = false) ReportStatus status) {
-        List<ReportResponse> response = reportService.getReportsByCommunity(communityId, status).stream()
-                .map(DtoMapper::toReportResponse)
-                .toList();
+    public ResponseEntity<PagedResponse<ReportResponse>> getReportsByCommunity(
+            @RequestParam UUID communityId,
+            @RequestParam(required = false) ReportStatus status,
+            @PageableDefault(size = 20, sort = "createdOn", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<ReportResponse> reports = reportService.getReportsByCommunity(communityId, status, pageable)
+                .map(DtoMapper::toReportResponse);
+        PagedResponse<ReportResponse> response = PagedResponse.from(reports);
 
         return ResponseEntity.ok(response);
     }
