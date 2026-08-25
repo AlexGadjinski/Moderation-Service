@@ -27,6 +27,11 @@ public class ReportController {
 
     private final ReportService reportService;
 
+    @GetMapping("/health")
+    public ResponseEntity<Void> health() {
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping
     public ResponseEntity<ReportResponse> createReport(@Valid @RequestBody CreateReportRequest request) {
         Report report = reportService.createReport(request);
