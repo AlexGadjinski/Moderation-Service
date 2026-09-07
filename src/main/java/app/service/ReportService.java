@@ -24,6 +24,9 @@ public class ReportService {
     private final ReportRepository reportRepository;
 
     public Report createReport(CreateReportRequest request) {
+        if (reportRepository.existsByReporterIdAndTargetId(request.getReporterId(), request.getTargetId())) {
+            throw new BusinessRuleException("You have already reported this content.");
+        }
 
         Report report = reportRepository.save(initializeReport(request));
         log.info("Report created with id [{}] for {} with id [{}] in community [{}].",
