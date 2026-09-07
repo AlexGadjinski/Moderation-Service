@@ -4,6 +4,7 @@ import app.dto.CreateReportRequest;
 import app.dto.UpdateReportRequest;
 import app.exception.BusinessRuleException;
 import app.exception.ReportNotFoundException;
+import app.exception.ResourceConflictException;
 import app.model.Report;
 import app.model.ReportStatus;
 import app.repository.ReportRepository;
@@ -25,7 +26,8 @@ public class ReportService {
 
     public Report createReport(CreateReportRequest request) {
         if (reportRepository.existsByReporterIdAndTargetId(request.getReporterId(), request.getTargetId())) {
-            throw new BusinessRuleException("You have already reported this content.");
+            throw new ResourceConflictException("Report with reporterId [%s] and targetId [%s] already exists."
+                    .formatted(request.getReporterId(), request.getTargetId()));
         }
 
         Report report = reportRepository.save(initializeReport(request));
